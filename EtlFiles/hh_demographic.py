@@ -5,7 +5,7 @@ conn = get_connection()
 cur=get_cursor(conn)
 
 # Open CSV file
-with open('../../SSISFolder/churn data/hh_demographic.csv') as f:
+with open('../../../SSISFolder/churn data/hh_demographic.csv') as f:
     csv_reader = csvcon.DictReader(f)
 
     # Insert data from CSV to database

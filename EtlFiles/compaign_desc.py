@@ -1,25 +1,28 @@
-from dbconnection import get_connection, get_cursor, csvcon
+import pandas as pd
+import datetime
+from dbconnection import get_connection, get_cursor
 
-# Connect to PostgreSQL database
+# Connect to db
 conn = get_connection()
 cur = get_cursor(conn)
 
-# Open CSV file
-with open('../../SSISFolder/churn data/campaign_desc.csv') as csv_file:
-    csv_reader = csvcon.reader(csv_file)
-    next(csv_reader)  # skip header
+# Load CSV into DataFrame 
+df = pd.read_csv('../../SSISFolder/churn data/campaign_desc.csv')
 
-    # Insert data from CSV to database
-    for row in csv_reader:
-        description = row[0]
-        campaign = row[1]
-        start_day = row[2]
-        end_day = row[3]
+# Insert DataFrame rows to database
+for index, row in df.iterrows():
+    description = row['DESCRIPTION']
+    campaign = row['CAMPAIGN']
+    start_day = int(row['START_DAY'])
+    end_day = int(row['END_DAY'])
 
-        cur.execute("""INSERT INTO campaign_desc 
-                        (DESCRIPTION, CAMPAIGN, START_DAY, END_DAY)
-                        VALUES (%s, %s, %s, %s)""",
-                    (description, campaign, start_day, end_day))
+    start_date = datetime.date(1900, 1, 1) + datetime.timedelta(days=start_day)
+    end_date = datetime.date(1900, 1, 1) + datetime.timedelta(days=end_day)
+
+    cur.execute("""
+        INSERT INTO compaign_desc (DESCRIPTION, CAMPAIGN, START_DAY, END_DAY) 
+        VALUES (%s, %s, %s, %s)
+    """, (description, campaign, start_date, end_date))
 
 conn.commit()
 cur.close()
